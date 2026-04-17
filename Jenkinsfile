@@ -18,19 +18,15 @@ pipeline {
         stage('Setup Snyk') {
             steps {
                 sh '''
-                    # Check if Snyk is installed
-                    if [ ! -x "$SNYK_PATH" ]; then
-                        echo "Installing Snyk CLI..."
-                        curl -Lo /tmp/snyk https://static.snyk.io/cli/latest/snyk-linux
-                        chmod +x /tmp/snyk
-                        mkdir -p /var/jenkins_home/bin
-                        mv /tmp/snyk /var/jenkins_home/bin/
-                        chmod +x /var/jenkins_home/bin/snyk
-                        export PATH="$HOME/bin:$PATH"
-                    fi
+                    echo "=== SETUP SNYK ==="
 
-                    # Authenticate with Snyk
-                    ${SNYK_PATH} auth ${SNYK_TOKEN}
+                    # Install Node.js (if not present)
+                    node -v || (apt-get update && apt-get install -y nodejs npm)
+
+                    # Install Snyk via npm (works on ARM)
+                    npm install -g snyk
+
+                    snyk --version
                 '''
             }
         }
